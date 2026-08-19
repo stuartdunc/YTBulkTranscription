@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="panel">
+  <h2>Setup</h2>
+  <form
+    class="setup-form"
+    hx-post="/analyze"
+    hx-target="#analysis-panel"
+    hx-swap="innerHTML"
+    hx-indicator="#analysis-indicator"
+    hx-disabled-elt="button[type='submit']"
+  >
+    <label>
+      <span>YouTube URL</span>
+      <input type="url" name="input_url" placeholder="https://www.youtube.com/watch?v=..." required>
+    </label>
+    <label>
+      <span>Output folder</span>
+      <input type="text" name="output_path" value="{{ default_output_path }}" required>
+    </label>
+    <div class="checkbox-row">
+      <label class="check"><input type="checkbox" name="skip_shorts" checked> Skip Shorts</label>
+      <label class="check"><input type="checkbox" name="skip_livestreams" checked> Skip livestreams</label>
+      <label class="check"><input type="checkbox" name="skip_members_only" checked> Skip members-only or unavailable</label>
+      <label class="check"><input type="checkbox" name="force_reprocess"> Force reprocess (ignore “unchanged”)</label>
+    </div>
+    <button type="submit">Start Analysis</button>
+  </form>
+</section>
+
+<section id="analysis-panel" class="panel panel-muted">
+  <h2>Analysis</h2>
+  <div id="analysis-indicator" class="htmx-indicator analyzing" aria-live="polite">
+    <span class="spinner" aria-hidden="true"></span>
+    <span>Analyzing…</span>
+  </div>
+  <p>Paste a YouTube URL and start analysis to review the detected scope before processing.</p>
+</section>
+
+<section class="panel">
+  <h2>Recent Jobs</h2>
+  {% if jobs %}
+    <div class="jobs-grid">
+      {% for job in jobs %}
+        <a class="job-card" href="/jobs/{{ job['id'] }}">
+          <strong>#{{ job['id'] }}</strong>
+          <span>{{ job['source_title'] }}</span>
+          <small>{{ job['status'] }} | {{ job['completed_videos'] }}/{{ job['total_videos'] }}</small>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No jobs yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<section
+  id="progress-panel"
+  hx-get="/jobs/{{ job['id'] }}/progress"
+  hx-trigger="load, every {{ poll_ms }}ms"
+  hx-swap="innerHTML"
+>
+  {% include "partials/progress_panel.html" %}
+</section>
+{% endblock %}
+

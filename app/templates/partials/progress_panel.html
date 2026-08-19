@@ -1,0 +1,80 @@
+<div class="panel">
+  <div class="toolbar">
+    <div>
+      <p class="eyebrow">Job #{{ job['id'] }}</p>
+      <h2>{{ job['source_title'] }}</h2>
+      <p>Status: <strong>{{ job['status'] }}</strong></p>
+    </div>
+    <div class="actions">
+      {% if job['status'] == 'running' %}
+        <form action="/jobs/{{ job['id'] }}/cancel" method="post">
+          <button class="danger" type="submit">Cancel</button>
+        </form>
+      {% endif %}
+      <form hx-post="/jobs/{{ job['id'] }}/open-output" hx-swap="none">
+        <button type="submit">Open Output Folder</button>
+      </form>
+      <a class="secondary-link" href="/" target="_top">New Job</a>
+    </div>
+  </div>
+
+  {% set processed = job['completed_videos'] + job['skipped_videos'] + job['failed_videos'] %}
+  {% set percent = ((processed / job['total_videos']) * 100) if job['total_videos'] else 0 %}
+
+  <div class="metrics-grid">
+    <div class="metric"><span>Completed</span><strong>{{ job['completed_videos'] }}</strong></div>
+    <div class="metric"><span>Skipped</span><strong>{{ job['skipped_videos'] }}</strong></div>
+    <div class="metric"><span>Failed</span><strong>{{ job['failed_videos'] }}</strong></div>
+    <div class="metric"><span>Remaining</span><strong>{{ job['total_videos'] - processed }}</strong></div>
+    <div class="metric"><span>Current Video</span><strong>{{ job['current_video_title'] or 'Idle' }}</strong></div>
+    <div class="metric"><span>Error Log</span><strong>{{ job['error_log_path'] or 'Pending' }}</strong></div>
+    <div class="metric"><span>Time Elapsed</span><strong>{{ timing['elapsed_display'] if timing else 'n/a' }}</strong></div>
+    <div class="metric"><span>Rough Remaining</span><strong>{{ timing['remaining_display'] if timing else 'n/a' }}</strong></div>
+    <div class="metric"><span>ETA (Local)</span><strong>{{ timing['eta_display'] if timing else 'n/a' }}</strong></div>
+  </div>
+
+  <div class="progress-track {% if job['status'] == 'running' and processed == 0 %}indeterminate{% endif %}">
+    <div class="progress-fill" style="width: {{ '%.1f'|format(percent) }}%"></div>
+  </div>
+
+  <div class="split-grid">
+    <div class="panel panel-nested">
+      <h3>Video Status</h3>
+      <div class="table-shell">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Info</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for video in videos %}
+              <tr>
+                <td>{{ video['position'] }}</td>
+                <td>{{ video['title'] }}</td>
+                <td>{{ video['status'] }}</td>
+                <td>{{ video['error_message'] or video['skip_reason'] or '' }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel panel-nested">
+      <h3>Events</h3>
+      <div class="log-feed">
+        {% for event in events %}
+          <div class="log-entry log-{{ event['level'] }}">
+            <strong>[{{ event['created_at'] }}]</strong>
+            <span>{{ event['stage'] }}</span>
+            <p>{{ event['message'] }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>

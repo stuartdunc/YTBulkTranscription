@@ -1,0 +1,41 @@
+<h2>Analysis</h2>
+{% if analysis_error %}
+  <div class="alert alert-error">{{ analysis_error }}</div>
+{% elif analysis %}
+  <div class="metrics-grid">
+    <div class="metric"><span>Detected Type</span><strong>{{ analysis.input_type }}</strong></div>
+    <div class="metric"><span>Source</span><strong>{{ analysis.source_title }}</strong></div>
+    <div class="metric"><span>Total Videos</span><strong>{{ analysis.total_videos }}</strong></div>
+    <div class="metric"><span>To Process</span><strong>{{ analysis.videos_to_process }}</strong></div>
+    <div class="metric"><span>Skipped</span><strong>{{ analysis.skipped_videos }}</strong></div>
+    <div class="metric"><span>Rough Estimate</span><strong>{{ (analysis.estimated_seconds // 60) or 1 }} min</strong></div>
+  </div>
+  <form action="/jobs/{{ job_id }}/start" method="post" class="inline-form">
+    <button type="submit">Go</button>
+    <a class="secondary-link" href="/jobs/{{ job_id }}">View Job</a>
+  </form>
+  <div class="table-shell">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Video</th>
+          <th>Action</th>
+          <th>Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for video in analysis.videos %}
+          <tr>
+            <td>{{ video.position }}</td>
+            <td>{{ video.title }}</td>
+            <td>{{ video.planned_action }}</td>
+            <td>{{ video.skip_reason or "" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p>Paste a YouTube URL and start analysis to review the detected scope before processing.</p>
+{% endif %}
